@@ -58,6 +58,8 @@ typora-root-url: ./
 
    ![image-20220301105521917](README.assets/image-20220301105521917.png)
 
+5. 执行`sudo /etc/init.d/networking restart`重启网络服务
+
 5. 在已创建的ROS工作空间中执行：
 
    ```bash

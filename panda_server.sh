@@ -1,5 +1,7 @@
 #!/bin/bash
 # panda机械臂的服务端，用于与工作站通讯，并接受工作站的命令，调用本包内的其他脚本/命令，来实现对panda机械臂的加解锁、重启ros controller的效果
+#2020/08/09   zzu-wgk  first-release
+#2022/03/01   zzu-wgk  version 1.1
 
 #如果模式为"-s"，就代表是刚启动，要运行roscore
 #注意，方括号后面要有一个空格才行，否则报错
