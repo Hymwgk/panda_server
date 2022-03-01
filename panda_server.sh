@@ -10,6 +10,9 @@ panda_state=1
 robot_ip="${2}"
 source /opt/ros/melodic/setup.bash
 export ROS_PACKAGE_PATH=~/catkin_ws/src:/opt/ros/melodic/share
+#设置本机hostname
+export ROS_HOSTNAME=zzu-desktop
+
 if [ -z  "${2}" ]; then
 	echo "未指定robot_ip"
 	echo "默认指定为192.168.10.1"
