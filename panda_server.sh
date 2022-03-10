@@ -10,10 +10,16 @@
 panda_state=1
 #${0} ${1}  ${2} ...是系统保留的变量，分别代表了当前脚本本身的名称、执行命令后缀的第一个参数、第二个参数、第三个参数...
 robot_ip="${2}"
+
 source /opt/ros/melodic/setup.bash
+#kinect相关，必须设置
+source ~/catkin_ws/devel/setup.bash
+export DISPLAY=:0.0
 export ROS_PACKAGE_PATH=~/catkin_ws/src:/opt/ros/melodic/share
 #设置本机hostname
 export ROS_HOSTNAME=zzu-desktop
+export ROS_MASTER_URI=http://localhost:11311
+
 
 if [ -z  "${2}" ]; then
 	echo "未指定robot_ip"
@@ -106,6 +112,61 @@ if [ "${1}" == "-k" ]; then
 
 fi
 
+#接收-rc指令，启动/重启kinect v2相机
+if [ "${1}" == "-rc" ] ; then
 
+	#获取kinect运行的pid进程号,awk '{print $2}'代表将语句按照空格划分，并返回和打印出第二部分非空格的字符
+	kinect_pid=$(ps -aux | grep "roslaunch kinect2_bridge kinect2_bridge.launch" | grep "/usr/bin/python" | awk '{print $2}')
+	echo "$kinect_pid"
+	#判断进程号是不是为null
+	if [ -z "$kinect_pid" ]; then
+		#kinect_pid为零（未运行）
+		
+		#启动运行，加上&代表另开一个窗口，在后台执行它
+		echo "准备启动kinect v2"
+		`roslaunch kinect2_bridge kinect2_bridge.launch publish_tf:=true`
+		echo "已启动kinect v2"
+	else
+		#kinect_pid为非零（已运行）
+		#杀掉进程	
+		kill $kinect_pid
+		echo "Kill $kinect_pid"
+		#不断循环查询kinect_pid，直到kinect_pid进程完全退出之后（kinect_pid为0成立）
+		until [ -z "$kinect_pid" ]
+		do
+		  kinect_pid=$(ps -aux | grep "roslaunch kinect2_bridge kinect2_bridge.launch" | grep "/usr/bin/python" | awk '{print $2}')
+		done
+		echo "done"
+		#kinect进程完全退出之后，在后台重启kinect
+		output=$(roslaunch kinect2_bridge kinect2_bridge.launch publish_tf:=true)
+		
+		echo "Kinect2 Re-started"
+	fi
 
+fi
+
+#接收-kc指令，停止kinect v2相机
+if [ "${1}" == "-kc" ] ; then
+	#获取kinect运行的pid进程号,awk '{print $2}'代表将语句按照空格划分，并返回和打印出第二部分非空格的字符
+	kinect_pid=$(ps -aux | grep "roslaunch kinect2_bridge kinect2_bridge.launch" | grep "/usr/bin/python" | awk '{print $2}')
+	echo "$kinect_pid"
+	#判断进程号是不是为null
+	if [ -z "$kinect_pid" ]; then
+		#kinect_pid为零（未运行）
+		echo "Kinect已停止"
+	else
+		#kinect_pid为非零（已运行）
+		#杀掉进程	
+		kill $kinect_pid
+		echo "Kill $kinect_pid"
+		#不断循环查询kinect_pid，直到kinect_pid进程完全退出之后（kinect_pid为0成立）
+		until [ -z "$kinect_pid" ]
+		do
+		  kinect_pid=$(ps -aux | grep "roslaunch kinect2_bridge kinect2_bridge.launch" | grep "/usr/bin/python" | awk '{print $2}')
+		done
+		echo "kinect 已关闭"
+
+	fi
+
+fi
 
